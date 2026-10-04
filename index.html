@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="离线餐饮具商家贡献利润与破损成本计算器，支持补寄、退款、保本售价和方案对比。">
+  <title>器物有数 · 餐饮具贡献利润计算器</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#calculator">跳到计算器</a>
+<header class="topbar"><a class="brand" href="#"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 36 36"><path d="M5 13h26c-1 10-6 14-13 14S6 23 5 13Z" fill="currentColor"/><path d="M13 30h10M8 8h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>器物有数<small>餐饮具经营小工具</small></span></a><span class="local-badge"><span></span>离线计算 · 数据不上传</span></header>
+<main>
+  <section class="intro"><div><p class="eyebrow">把每一单，算明白</p><h1>售价之外，<br class="mobile-only">还有多少利润？</h1><p class="lede">把包装、运费、投放和破损售后算进去，看看这一单真正留下多少。</p></div><aside class="sample-note"><b>先用一组假设数据试算</b><p>页面初值仅为演示，不是平台费率或行业基准。请换成你的实际成本。</p><button class="text-button" id="reset" type="button">恢复示例数值 <span aria-hidden="true">↺</span></button></aside></section>
+  <noscript><p class="alert">需要启用浏览器 JavaScript 才能进行计算；所有计算均在本地完成。</p></noscript>
+  <div class="calculator-grid" id="calculator">
+    <form id="inputs" novalidate aria-label="订单与成本参数">
+      <section class="card form-section"><div class="section-heading"><span class="section-number">01</span><div><h2>一笔订单的基础账</h2><p>单位：人民币元 / 原始成交订单</p></div></div><div class="fields" id="base-fields"></div></section>
+      <section class="card form-section"><div class="section-heading"><span class="section-number">02</span><div><h2>渠道与获客成本</h2><p>按实际结算规则填写，不预设任何平台规则</p></div></div><div class="fields" id="fee-fields"></div><p class="field-note">两个比例费率都以原始成交售价为基数；固定手续费另算。若平台计费基数不同，请先折算后使用。</p></section>
+      <section class="card form-section"><div class="section-heading"><span class="section-number">03</span><div><h2>把破损售后算进去</h2><p>每笔原始订单最多发生一次补寄或全额退款</p></div></div><div class="fields" id="damage-fields"></div><div class="explanation" id="outcome-help"></div><details id="aftercare-details" open><summary>售后额外成本与退费假设</summary><p class="field-note">以下只填初次发货以外增加的成本；补寄成本独立填写，不会随采购成本自动变化。</p><div class="fields" id="aftercare-fields"></div></details></section>
+      <section class="card form-section"><div class="section-heading"><span class="section-number">04</span><div><h2>你的目标与订单量</h2><p>目标利润率以扣除全额退款后的预计收入为分母</p></div></div><div class="fields" id="target-fields"></div></section>
+    </form>
+    <aside class="results-column" aria-label="计算结果">
+      <section class="result-card" aria-live="polite" aria-atomic="true"><p class="eyebrow">每笔原始订单 · 期望值</p><h2>贡献利润</h2><div id="error-summary" class="error-summary" hidden></div><div id="result-content"><div class="hero-number" id="profit">—</div><p class="profit-status" id="profit-status">正在计算</p><div class="primary-metrics"><div><span>贡献利润率</span><strong id="margin">—</strong></div><div><span>保本售价</span><strong id="break-even">—</strong></div></div><div class="target-box"><span id="target-label">目标贡献利润率 20%</span><strong id="target-price">—</strong><small>所需售价 · 按分向上取整</small></div><dl class="secondary-metrics"><div><dt>破损带来的预计损失</dt><dd id="damage-total">—</dd></div><div><dt>贡献保本广告费上限</dt><dd id="max-ad">—</dd></div><div><dt id="monthly-label">每月预计贡献利润</dt><dd id="monthly-profit">—</dd></div></dl><p class="result-warning" id="result-warning" hidden></p></div><p class="accounting-note">这是贡献利润，不是会计净利润。尚未扣除未录入的税费、固定人工、房租、设备折旧等。</p></section>
+      <section class="card breakdown"><h3>这一单的钱去了哪里</h3><p class="muted">从原始成交金额逐项扣减</p><div id="breakdown"></div><p class="field-note">分项独立四舍五入，合计可能有 ¥0.01 差异。</p></section>
+    </aside>
+  </div>
+  <section class="card compare-section" aria-labelledby="compare-title"><div class="wide-heading"><div><p class="eyebrow">把选择摆在一起</p><h2 id="compare-title">方案对比</h2><p class="muted">改售价、改包装、换物流，保存最多 4 个方案对照。</p></div><button class="button secondary" type="button" id="export">导出 CSV</button></div><div class="save-controls"><label for="scenario-name">方案名称</label><input id="scenario-name" maxlength="40" placeholder="例如：加厚包装 / 新物流" type="text"><button class="button" id="save" type="button">保存当前方案</button></div><p id="scenario-status" class="field-note" role="status">方案只保留在当前页面，刷新或关闭即清空；需要留档请导出 CSV。</p><div class="table-scroll"><table id="comparison"><caption class="sr-only">当前方案与已保存方案的成本和贡献利润</caption><thead><tr><th scope="col">方案</th><th scope="col">售价</th><th scope="col">破损率</th><th scope="col">贡献利润</th><th scope="col">贡献利润率</th><th scope="col">保本售价</th><th scope="col">操作</th></tr></thead><tbody></tbody></table></div></section>
+  <section class="card sensitivity-section"><div class="wide-heading"><div><p class="eyebrow">给经营留一点余量</p><h2>如果价格或破损率变了？</h2><p class="muted">其他参数保持当前值，查看每单贡献利润。只是情景试算，不是预测。</p></div></div><div class="table-scroll"><table id="sensitivity"><caption class="sr-only">不同售价与破损率下的贡献利润</caption><thead></thead><tbody></tbody></table></div></section>
+  <section class="method-section"><details><summary>计算口径与使用边界</summary><div class="method-grid"><div><h3>原始订单只记一次</h3><p>每单先发生一次商品、包装、出库运费、获客、固定手续费及其他成本。破损订单分为补寄和全额退款两类，互斥且不会重复计提。正常订单无需额外售后成本。</p><h3>补寄与退款的区别</h3><p>补寄订单保留原订单收入，另加一次补寄商品、包装、运费和其他成本。全额退款订单收入归零，初次成本仍保留，另加退款处理成本。无部分退款、退货残值、重复破损或多次补寄。</p></div><div><h3>退款时，比例手续费可能不退</h3><p>手续费退回比例由你填写。0% 表示不退比例手续费，100% 表示全退；固定手续费仍计入初始成本。退款处理成本只填额外费用，不要再次填商品价款。</p><h3>一个简明公式</h3><p>贡献利润 = 预计保留收入 − 预计比例手续费 − 初始成本 − 预计售后额外成本。贡献利润率 = 贡献利润 ÷ 预计保留收入。保本是贡献利润为零，尚不代表覆盖全部经营固定成本。</p></div></div><p class="field-note">不自动计算税费、平台补贴、优惠券拆分、退货回收价值、跨币种、阶梯费率或库存现金流。数字为数学期望，真实单月结果会波动。费用含税 / 不含税口径请自行保持一致。详细公式及测试方法见随包 README。</p></details></section>
+</main>
+<footer><span>器物有数 <span class="footer-dot">·</span> v1.0.0</span><span>本地运行，无账号、无追踪、无外部依赖 <span class="footer-dot">·</span> MIT License</span></footer>
+</body></html>
